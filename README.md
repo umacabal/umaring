@@ -1,4 +1,4 @@
-`# UMass Amherst Web Ring
+# UMass Amherst Web Ring
 
 This is a web ring for UMass Amherst students, alumni, and faculty.
 It is a collection of personal websites, blogs, and other web pages.

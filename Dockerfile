@@ -25,6 +25,7 @@ ENV TZ="America/New_York"
 
 # Copy the binary from the build stage
 COPY --from=builder /target/release/umaring /usr/local/bin/umaring
+COPY ./members.json /usr/local/bin/members.json
 
 # Set the command to run the binary
 WORKDIR /usr/local/bin
