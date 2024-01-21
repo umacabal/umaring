@@ -17,7 +17,7 @@ Add the following script to your website:
 Replace `ID` with your ID in the members.json file.
 Make sure to keep in the `id="umaring_js"` part of the script tag.
 
-### Using your own script
+### Building your own integration
 Please integrate with the following API:
 `GET https://umaring.hamy.cc/:id`
 This will return a JSON object with the following format:
