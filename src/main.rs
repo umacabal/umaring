@@ -4,7 +4,10 @@ use tower_http::cors::CorsLayer;
 use axum::{
     routing,
     Router,
-    response::Redirect,
+    response::{
+        Redirect,
+        Response,
+    },
 };
 
 mod get;
@@ -22,6 +25,7 @@ async fn main() {
         .route("/", 
             routing::get(|| async { Redirect::temporary("https://github.com/umaring/umaring") })
         )
+        .route("/health", routing::get(health))
         .route("/all", routing::get(get::all))
         .route("/:id", routing::get(get::one))
         .layer(CorsLayer::permissive())
@@ -34,3 +38,11 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
+async fn health() -> Response<String> {
+    let commit = std::env::var("COMMIT").unwrap_or("unknown".to_string());
+                
+    Response::builder()
+        .header("Content-Type", "text/plain")
+        .body(format!("OK\n{}", commit))
+        .unwrap()
+}
