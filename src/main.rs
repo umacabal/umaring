@@ -21,6 +21,8 @@ async fn main() {
 
     let state = Arc::new(RwLock::new(state));
 
+    let ring_js = std::fs::read_to_string("./js/ring.js").unwrap();
+
     let app = Router::new()
         .route("/", 
             routing::get(|| async { Redirect::temporary("https://github.com/umaring/umaring") })
@@ -28,6 +30,12 @@ async fn main() {
         .route("/health", routing::get(health))
         .route("/all", routing::get(get::all))
         .route("/:id", routing::get(get::one))
+        .route("/ring.js", routing::get(move || async move {
+            Response::builder()
+                .header("Content-Type", "text/javascript")
+                .body(ring_js.clone())
+                .unwrap()
+        }))
         .layer(CorsLayer::permissive())
         .with_state(state);
 

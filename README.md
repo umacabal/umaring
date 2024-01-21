@@ -8,7 +8,13 @@ It is a collection of personal websites, blogs, and other web pages.
 2. Once accepted make sure to add the webring to your website in some way.
 
 ### Using our script
-A script has not been made yet, but will be soon.
+Add the following script to your website:
+```html
+<script id="webring_js" src="https://umaring.hamy.cc/ring.js?id=ID"></script>
+```
+
+Replace `ID` with your ID in the members.json file.
+Make sure to keep in the `id="webring_js"` part of the script tag.
 
 ### Using your own script
 Please integrate with the following API:
