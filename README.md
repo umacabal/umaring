@@ -41,4 +41,17 @@ This will return a JSON object with the following format:
 }
 ```
 Please pull the latest version of the webring at least once every 6 hours, but preferably once every hour. This will ensure that the webring is up to date.
-`
+
+## 88x31 Button
+If you want to add a button to your website, you can use the following image:
+![UMass Amherst Web Ring](umass.png)
+
+You should turn off anti-aliasing for the image to make it look better.
+```
+img {
+    image-rendering: auto;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: -webkit-optimize-contrast;
+}
+```
