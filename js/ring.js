@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const scriptTag = document.getElementById('webring_js');
+        const scriptTag = document.getElementById('umaring_js');
         if (!scriptTag) {
             console.error('UMass Amherst webring script tag not found.');
             return;

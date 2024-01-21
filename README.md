@@ -10,11 +10,12 @@ It is a collection of personal websites, blogs, and other web pages.
 ### Using our script
 Add the following script to your website:
 ```html
-<script id="webring_js" src="https://umaring.hamy.cc/ring.js?id=ID"></script>
+<script id="umaring_js" src="https://umaring.hamy.cc/ring.js?id=ID"></script>
+<div id="umaring"></div>
 ```
 
 Replace `ID` with your ID in the members.json file.
-Make sure to keep in the `id="webring_js"` part of the script tag.
+Make sure to keep in the `id="umaring_js"` part of the script tag.
 
 ### Using your own script
 Please integrate with the following API:
