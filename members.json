@@ -18,5 +18,10 @@
         "id": "rporta",
         "name": "Rose Porta",
         "url": "https://roseporta.com"
+    },
+    {
+        "id": "tbo",
+        "name": "Shanyu Thibaut Juneja",
+        "url": "https://ghast.dev"
     }
 ]
