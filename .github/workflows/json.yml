@@ -1,0 +1,19 @@
+name: Validate JSON
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install jq
+        run: sudo apt install -y jq
+
+      - name: Validate json
+        run: jq . members.json
