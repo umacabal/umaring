@@ -15,5 +15,9 @@ jobs:
       - name: Install jq
         run: sudo apt install -y jq
 
-      - name: Validate json
-        run: jq . members.json
+      - name: Validate json structure
+        run: |
+          if ! jq 'all(.[]; has("id") and has("name") and has("url"))' members.json; then
+            echo "JSON validation failed: not all elements have 'id', 'name', and 'url'"
+            exit 1
+          fi
