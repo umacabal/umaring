@@ -33,5 +33,10 @@
         "id": "veera",
         "name": "Veera",
         "url": "https://veera.app/"
+    },
+    {
+        "id": "test",
+        "name": "test member",
+        "url": "https://example.com"
     }
 ]
