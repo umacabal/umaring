@@ -35,4 +35,7 @@
         "url": "https://veera.app/"
     },
     {
+        "id": "test",
+        "name": "testing"
+    }
 ]
