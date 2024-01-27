@@ -16,4 +16,4 @@ jobs:
         run: sudo apt install -y jq
 
       - name: Validate json
-        run: jq . members.json
+        run: jq 'all(.[]; has("id") and has("name") and has("url"))' members.json
