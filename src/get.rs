@@ -11,9 +11,9 @@ use crate::ring::{Ring, Member};
 
 #[derive(Serialize)]
 struct MemberGetResponse {
-    prev: Option<Member>,
+    prev: Member,
     member: Member,
-    next: Option<Member>,
+    next: Member,
 }
 
 pub async fn one(
@@ -21,54 +21,86 @@ pub async fn one(
     Path(id): Path<String>,
 ) -> Result<Response<String>, std::convert::Infallible> {
     let state = state.read().await;
-    let member_link = state.members.get(&id);
+    let member = state.get(&id);
 
-    if member_link.is_none() {
-        return Ok(
-            Response::builder()
-                .status(404)
-                .body("Member not found".to_string())
-                .unwrap()
-        );
+    if member.is_none() {
+        return member_not_found()
     }
 
-    let member_link = member_link.unwrap();
+    let member = member.unwrap();
 
-    let member = member_link.read().await.member.clone();
-
-    let next = match &member_link.read().await.next {
-        Some(next) => Some(next.read().await.member.clone()),
-        None => None,
-    };
-
-    let prev = match &member_link.read().await.prev {
-        Some(prev) => Some(prev.read().await.member.clone()),
-        None => None,
-    };
+    let (prev, next) = state.neighbors(&id).unwrap();
 
     let response = MemberGetResponse {
-        member,
-        next,
-        prev,
+        member: member.clone(),
+        next: next.clone(),
+        prev: prev.clone(),
     };
 
-    let response_json = serde_json::to_string(&response).unwrap();
-    Ok(Response::builder()
-        .header("Content-Type", "application/json")
-        .body(response_json)
-        .unwrap()
-    )
+    json_response(response)
+}
+
+// Send temporary redirect to the prev member
+pub async fn prev(
+    State(state): State<Arc<RwLock<Ring>>>,
+    Path(id): Path<String>,
+) -> Result<Response<String>, std::convert::Infallible> {
+    let state = state.read().await;
+    let member = state.get(&id);
+
+    if member.is_none() {
+        return member_not_found()
+    }
+
+    let (prev, _) = state.neighbors(&id).unwrap();
+
+    temporary_redirect(&prev.url)
+}
+
+pub async fn next(
+    State(state): State<Arc<RwLock<Ring>>>,
+    Path(id): Path<String>,
+) -> Result<Response<String>, std::convert::Infallible> {
+    let state = state.read().await;
+    let member = state.get(&id);
+
+    if member.is_none() {
+        return member_not_found()
+    }
+
+    let (_, next) = state.neighbors(&id).unwrap();
+
+    temporary_redirect(&next.url)
 }
 
 pub async fn all(
     State(state): State<Arc<RwLock<Ring>>>,
 ) -> Result<Response<String>, std::convert::Infallible> {
     let state = state.read().await;
-    let members = state.all.clone();
-    let members_json = serde_json::to_string(&members).unwrap();
+
+    let members = state.all();
+    json_response(members)
+}
+
+fn temporary_redirect(url: &str) -> Result<Response<String>, std::convert::Infallible> {
+    Ok(Response::builder()
+        .status(302)
+        .header("Location", url)
+        .body("".to_string())
+        .unwrap())
+}
+
+fn json_response<T: Serialize>(data: T) -> Result<Response<String>, std::convert::Infallible> {
+    let json = serde_json::to_string(&data).unwrap();
     Ok(Response::builder()
         .header("Content-Type", "application/json")
-        .body(members_json)
-        .unwrap()
-    )
+        .body(json)
+        .unwrap())
+}
+
+fn member_not_found() -> Result<Response<String>, std::convert::Infallible> {
+    Ok(Response::builder()
+        .status(404)
+        .body("Member not found".to_string())
+        .unwrap())
 }

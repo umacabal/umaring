@@ -15,9 +15,7 @@ mod ring;
 
 #[tokio::main]
 async fn main() {
-    let mut state = ring::Ring::new();
-    state.initialize_from_toml(include_str!("../members.toml")).await;
-    state.link_members().await;
+    let state = ring::Ring::new(include_str!("../members.toml"));
 
     let state = Arc::new(RwLock::new(state));
 
@@ -30,6 +28,8 @@ async fn main() {
         .route("/health", routing::get(health))
         .route("/all", routing::get(get::all))
         .route("/:id", routing::get(get::one))
+        .route("/:id/prev", routing::get(get::prev))
+        .route("/:id/next", routing::get(get::next))
         .route("/ring.js", routing::get(move || async move {
             Response::builder()
                 .header("Content-Type", "text/javascript")
