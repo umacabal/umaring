@@ -16,7 +16,7 @@ mod ring;
 #[tokio::main]
 async fn main() {
     let mut state = ring::Ring::new();
-    state.initialize_from_json_file("members.json").await;
+    state.initialize_from_toml(include_str!("../members.toml")).await;
     state.link_members().await;
 
     let state = Arc::new(RwLock::new(state));

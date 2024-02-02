@@ -1,0 +1,39 @@
+[[users]]
+id = "hampton"
+name = "Hampton Moore"
+url = "https://hamptonmoore.com"
+
+[[users]]
+id = "jordan"
+name = "Jordan Day"
+url = "https://jordane.day"
+
+[[users]]
+id = "kush"
+name = "Kushagra Srivastava"
+url = "https://skushagra.com"
+
+[[users]]
+id = "fcatalano"
+name = "Francesco Catalano"
+url = "https://www.fcatalanoanisciblog.com/"
+
+[[users]]
+id = "rporta"
+name = "Rose Porta"
+url = "https://roseporta.com"
+
+[[users]]
+id = "tbo"
+name = "Shanyu Thibaut Juneja"
+url = "https://ghast.dev"
+
+[[users]]
+id = "s3gfault"
+name = "Jasmine Cai"
+url = "https://s3gfault.dev"
+
+[[users]]
+id = "veera"
+name = "Veera"
+url = "https://veera.app/"

@@ -23,6 +23,11 @@ pub struct Ring {
     pub all: Vec<Member>,
 }
 
+#[derive(Deserialize)]
+pub struct RingSource {
+    pub users: Vec<Member>,
+}
+
 impl Ring {
     pub fn new() -> Self {
         Ring {
@@ -31,10 +36,9 @@ impl Ring {
         }
     }
 
-    pub async fn initialize_from_json_file(&mut self, path: &str) {
-        let json = std::fs::read_to_string(path).unwrap();
-        let members: Vec<Member> = serde_json::from_str(&json).unwrap();
-        for (index, member) in members.into_iter().enumerate() {
+    pub async fn initialize_from_toml(&mut self, toml: &str) {
+        let ring: RingSource = toml::from_str(&toml).unwrap();
+        for (index, member) in ring.users.into_iter().enumerate() {
             self.add_member(member, index);
         }
     }
