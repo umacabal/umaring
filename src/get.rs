@@ -16,11 +16,11 @@ struct MemberGetResponse {
 }
 
 pub async fn one(
-    State(state): State<Arc<RwLock<Ring>>>,
+    State(ring): State<Arc<RwLock<Ring>>>,
     Path(id): Path<String>,
 ) -> Result<Response<String>, std::convert::Infallible> {
-    let state = state.read().await;
-    let member = state.get(&id);
+    let ring = ring.read().await;
+    let member = ring.get(&id);
 
     if member.is_none() {
         return member_not_found();
@@ -28,7 +28,7 @@ pub async fn one(
 
     let member = member.unwrap();
 
-    let (prev, next) = state.neighbors(&id).unwrap();
+    let (prev, next) = ring.neighbors(&id).unwrap();
 
     let response = MemberGetResponse {
         member: member.clone(),
@@ -41,43 +41,43 @@ pub async fn one(
 
 // Send temporary redirect to the prev member
 pub async fn prev(
-    State(state): State<Arc<RwLock<Ring>>>,
+    State(ring): State<Arc<RwLock<Ring>>>,
     Path(id): Path<String>,
 ) -> Result<Response<String>, std::convert::Infallible> {
-    let state = state.read().await;
-    let member = state.get(&id);
+    let ring = ring.read().await;
+    let member = ring.get(&id);
 
     if member.is_none() {
         return member_not_found();
     }
 
-    let (prev, _) = state.neighbors(&id).unwrap();
+    let (prev, _) = ring.neighbors(&id).unwrap();
 
     temporary_redirect(&prev.url)
 }
 
 pub async fn next(
-    State(state): State<Arc<RwLock<Ring>>>,
+    State(ring): State<Arc<RwLock<Ring>>>,
     Path(id): Path<String>,
 ) -> Result<Response<String>, std::convert::Infallible> {
-    let state = state.read().await;
-    let member = state.get(&id);
+    let ring = ring.read().await;
+    let member = ring.get(&id);
 
     if member.is_none() {
         return member_not_found();
     }
 
-    let (_, next) = state.neighbors(&id).unwrap();
+    let (_, next) = ring.neighbors(&id).unwrap();
 
     temporary_redirect(&next.url)
 }
 
 pub async fn all(
-    State(state): State<Arc<RwLock<Ring>>>,
+    State(ring): State<Arc<RwLock<Ring>>>,
 ) -> Result<Response<String>, std::convert::Infallible> {
-    let state = state.read().await;
+    let ring = ring.read().await;
 
-    let members = state.iter().collect::<Vec<&Member>>();
+    let members = ring.iter().collect::<Vec<&Member>>();
     json_response(members)
 }
 
@@ -103,4 +103,3 @@ fn member_not_found() -> Result<Response<String>, std::convert::Infallible> {
         .body("Member not found".to_string())
         .unwrap())
 }
-
