@@ -9,13 +9,12 @@ use tower_http::cors::CorsLayer;
 mod get;
 mod ring;
 
+static RING_JS: &str = include_str!("../js/ring.js");
 #[tokio::main]
 async fn main() {
     let ring = ring::Ring::new(include_str!("../members.toml"));
 
     let ring = Arc::new(RwLock::new(ring));
-
-    let ring_js = std::fs::read_to_string("./js/ring.js").unwrap();
 
     let ring_clone = ring.clone();
     tokio::spawn(async move {
@@ -43,7 +42,7 @@ async fn main() {
             routing::get(move || async move {
                 Response::builder()
                     .header("Content-Type", "text/javascript")
-                    .body(ring_js.clone())
+                    .body(RING_JS.to_string())
                     .unwrap()
             }),
         )
