@@ -1,13 +1,12 @@
-
+use axum::{
+    extract::{Path, State},
+    response::Response,
+};
 use serde::Serialize;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use axum::{
-    extract::{State, Path},
-    response::Response,
-};
 
-use crate::ring::{Ring, Member};
+use crate::ring::{Member, Ring};
 
 #[derive(Serialize)]
 struct MemberGetResponse {
@@ -24,7 +23,7 @@ pub async fn one(
     let member = state.get(&id);
 
     if member.is_none() {
-        return member_not_found()
+        return member_not_found();
     }
 
     let member = member.unwrap();
@@ -49,7 +48,7 @@ pub async fn prev(
     let member = state.get(&id);
 
     if member.is_none() {
-        return member_not_found()
+        return member_not_found();
     }
 
     let (prev, _) = state.neighbors(&id).unwrap();
@@ -65,7 +64,7 @@ pub async fn next(
     let member = state.get(&id);
 
     if member.is_none() {
-        return member_not_found()
+        return member_not_found();
     }
 
     let (_, next) = state.neighbors(&id).unwrap();
@@ -78,7 +77,7 @@ pub async fn all(
 ) -> Result<Response<String>, std::convert::Infallible> {
     let state = state.read().await;
 
-    let members = state.all();
+    let members = state.iter().collect::<Vec<&Member>>();
     json_response(members)
 }
 
@@ -104,3 +103,4 @@ fn member_not_found() -> Result<Response<String>, std::convert::Infallible> {
         .body("Member not found".to_string())
         .unwrap())
 }
+

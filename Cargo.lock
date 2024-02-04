@@ -857,6 +857,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "rand",
+ "rand_chacha",
  "serde",
  "serde_json",
  "tokio",

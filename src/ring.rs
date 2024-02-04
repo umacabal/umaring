@@ -1,5 +1,7 @@
+use rand::{seq::SliceRandom, SeedableRng};
+use rand_chacha::ChaChaRng;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Member {
@@ -8,10 +10,9 @@ pub struct Member {
     pub url: String,
 }
 
-#[derive(Clone)]
 pub struct Ring {
-    lookup: HashMap<String, usize>,
     members: Vec<Member>,
+    mapping: Vec<usize>,
 }
 
 #[derive(Deserialize)]
@@ -21,41 +22,50 @@ pub struct RingSource {
 
 impl Ring {
     pub fn new(toml: &str) -> Self {
+        let ring_source: RingSource = toml::from_str(toml).unwrap();
+        let users = ring_source.users;
 
-        let mut lookup = HashMap::new();
-        let mut members = Vec::new();
+        let mut ring = Self {
+            mapping: vec![],
+            members: users,
+        };
 
-        let ring_source: RingSource = toml::from_str(&toml).unwrap();
+        ring.shuffle();
 
-        for (index, member) in ring_source.users.into_iter().enumerate() {
-            lookup.insert(member.id.clone(), index);
-            members.push(member);
-        }
+        ring
+    }
 
-        Self { lookup, members }
+    pub fn shuffle(&mut self) {
+        let epoch = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or(Duration::new(1, 0))
+            .as_secs()
+            / (60 * 60 * 24 * 7); // Seed is weeks since 1970
+
+        let mut rng = ChaChaRng::seed_from_u64(epoch);
+
+        let mut mapping: Vec<usize> = (0..self.members.len()).collect();
+        mapping.shuffle(&mut rng);
+
+        self.mapping = mapping;
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &Member> {
+        let len = self.members.len();
+        (0..len).map(move |i| &self.members[self.mapping[i % len]])
     }
 
     pub fn get(&self, id: &str) -> Option<&Member> {
-        let index = self.lookup.get(id)?;
-        Some(&self.members[*index])
+        self.iter().find(|m| m.id == id)
     }
 
     pub fn neighbors(&self, id: &str) -> Option<(&Member, &Member)> {
-        let index = self.lookup.get(id)?;
-        let prev = if *index == 0 {
-            &self.members[self.members.len() - 1]
-        } else {
-            &self.members[*index - 1]
-        };
-        let next = if *index == self.members.len() - 1 {
-            &self.members[0]
-        } else {
-            &self.members[*index + 1]
-        };
-        Some((prev, next))
-    }
+        let index = self.iter().position(|m| m.id == id)?;
 
-    pub fn all(&self) -> &Vec<Member> {
-        &self.members
+        let prev =
+            &self.members[self.mapping[(index + self.members.len() - 1) % self.members.len()]];
+        let next = &self.members[self.mapping[(index + 1) % self.members.len()]];
+
+        Some((prev, next))
     }
 }
