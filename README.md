@@ -4,7 +4,7 @@ This is a web ring for UMass Amherst students, alumni, and faculty.
 It is a collection of personal websites, blogs, and other web pages.
 
 ## How to join
-1. Add your website to the members.json and submit a pull request.
+1. Add your website to the members.toml and submit a pull request.
 2. Once accepted make sure to add the webring to your website in some way.
 
 ### Using our script
@@ -14,7 +14,7 @@ Add the following script to your website:
 <div id="umaring"></div>
 ```
 
-Replace `ID` with your ID in the members.json file.
+Replace `ID` with your ID in the members.toml file.
 Make sure to keep in the `id="umaring_js"` part of the script tag.
 
 ### Building your own integration
