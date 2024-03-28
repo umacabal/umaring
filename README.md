@@ -10,7 +10,7 @@ It is a collection of personal websites, blogs, and other web pages.
 ### Using our script
 Add the following script to your website:
 ```html
-<script id="umaring_js" src="https://umaring.hamy.cc/ring.js?id=ID"></script>
+<script id="umaring_js" src="https://umaring.mkr.cx/ring.js?id=ID"></script>
 <div id="umaring"></div>
 ```
 
@@ -19,7 +19,7 @@ Make sure to keep in the `id="umaring_js"` part of the script tag.
 
 ### Building your own integration
 Please integrate with the following API:
-`GET https://umaring.hamy.cc/:id`
+`GET https://umaring.mkr.cx/:id`
 This will return a JSON object with the following format:
 ```json
 {

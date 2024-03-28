@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const response = await fetch(`https://umaring.hamy.cc/${memberId}`);
+    const response = await fetch(`https://umaring.mkr.cx/${memberId}`);
     if (!response.ok) {
       console.error("Failed to fetch UMass Amherst webring data.");
       return;
