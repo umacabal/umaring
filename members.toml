@@ -52,3 +52,8 @@ url = "https://figamin.net"
 id = "rpil"
 name = "Roland Pilenyi"
 url = "https://rpil.dev"
+
+[[users]]
+id = "squirrelly"
+name = "August"
+url = "https://squirrelly.glykon.cc"
