@@ -62,3 +62,8 @@ url = "https://squirrelly.glykon.cc"
 id = "theblushirtdude"
 name = "Shankar"
 url = "https://shankarsubs.vercel.app/"
+
+[[users]]
+id = "mari"
+name = "Mari Braun"
+url = "https://beemari.com"
