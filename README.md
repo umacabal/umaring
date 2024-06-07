@@ -10,11 +10,11 @@ It is a collection of personal websites, blogs, and other web pages.
 ### Using our script
 Add the following script to your website:
 ```html
-<script id="umaring_js" src="https://umaring.mkr.cx/ring.js?id=ID"></script>
+<script id="umaring_js" src="https://umaring.mkr.cx/ring.js?id=USERNAME"></script>
 <div id="umaring"></div>
 ```
 
-Replace `ID` with your ID in the members.toml file.
+Replace `USERNAME` with your id from the members.toml file.
 Make sure to keep in the `id="umaring_js"` part of the script tag.
 
 ### Building your own integration
