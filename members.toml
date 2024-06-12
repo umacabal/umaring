@@ -67,3 +67,8 @@ url = "https://shankarsubs.vercel.app/"
 id = "mari"
 name = "Mari Braun"
 url = "https://beemari.com"
+
+[[users]]
+id = "khazixi"
+name = "Jason"
+url = "https://jsimmonds.dev"
