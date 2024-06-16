@@ -30,7 +30,7 @@ async fn main() {
     let app = Router::new()
         .route(
             "/",
-            routing::get(|| async { Redirect::temporary("https://github.com/umaring/umaring") }),
+            routing::get(|| async { Redirect::temporary("https://github.com/umacabal/umaring") }),
         )
         .route("/health", routing::get(health))
         .route("/all", routing::get(get::all))
