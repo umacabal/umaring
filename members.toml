@@ -34,19 +34,9 @@ name = "Jasmine Cai"
 url = "https://s3gfault.dev"
 
 [[users]]
-id = "veera"
-name = "Veera"
-url = "https://veera.app/"
-
-[[users]]
 id = "leon"
 name = "leon332157"
 url = "https://leon3321.is-a.dev"
-
-[[users]]
-id = "figamin"
-name = "Ian Anderson"
-url = "https://figamin.net"
 
 [[users]]
 id = "rpil"
