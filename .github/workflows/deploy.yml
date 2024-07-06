@@ -6,7 +6,7 @@ on:
     tags:
       - 'v*'
 env:
-  REGISTRY: registry.k8s.yyz1.hammy.network
+  REGISTRY: registry.hamptonmoore.com
   IMAGE_NAME: umaring
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
       - name: Login to the Docker registry
         uses: docker/login-action@v2
         with:
-          registry: registry.k8s.yyz1.hammy.network
+          registry: registry.hamptonmoore.com
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
