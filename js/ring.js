@@ -1,27 +1,10 @@
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    const scriptTag = document.getElementById("umaring_js");
-    if (!scriptTag) {
-      console.error("UMass Amherst webring script tag not found.");
-      return;
-    }
 
-    const memberId = new URL(scriptTag.src).searchParams.get("id");
-    if (!memberId) {
-      console.error("Member ID not specified in script tag.");
-      return;
-    }
-
-    const response = await fetch(`https://umaring.mkr.cx/${memberId}`);
-    if (!response.ok) {
-      console.error("Failed to fetch UMass Amherst webring data.");
-      return;
-    }
-
-    const data = await response.json();
+    const data = JSON_DATA_HERE;
     const { prev, next } = data;
 
-    const mode = new URL(scriptTag.src).searchParams.get("mode");
+    const mode = "MODE_PARAM_HERE";
     switch (mode) {
       case "link":
         const webringPrev = document.getElementById("umaring_prev");

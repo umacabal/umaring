@@ -1,12 +1,20 @@
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     response::Response,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
 use crate::ring::{Member, Ring};
+
+static RING_JS: &str = include_str!("../js/ring.js");
+
+#[derive(Deserialize)]
+pub struct ScriptParams {
+    id: String,
+    mode: Option<String>
+}
 
 #[derive(Serialize)]
 struct MemberGetResponse {
@@ -15,28 +23,35 @@ struct MemberGetResponse {
     next: Member,
 }
 
-pub async fn one(
-    State(ring): State<Arc<RwLock<Ring>>>,
-    Path(id): Path<String>,
-) -> Result<Response<String>, std::convert::Infallible> {
+async fn get_member_response(ring: Arc<RwLock<Ring>>, id: String) -> Option<MemberGetResponse> {
     let ring = ring.read().await;
     let member = ring.get(&id);
 
     if member.is_none() {
-        return member_not_found();
+        return None;
     }
 
     let member = member.unwrap();
 
     let (prev, next) = ring.neighbors(&id).unwrap();
 
-    let response = MemberGetResponse {
+    Some(MemberGetResponse {
         member: member.clone(),
         next: next.clone(),
         prev: prev.clone(),
-    };
+    })
+}
 
-    json_response(response)
+pub async fn one(
+    State(ring): State<Arc<RwLock<Ring>>>,
+    Path(id): Path<String>,
+) -> Result<Response<String>, std::convert::Infallible> {
+    let response = get_member_response(ring, id).await;
+    if response.is_none() {
+        return member_not_found();
+    }
+
+    json_response(response.unwrap())
 }
 
 // Send temporary redirect to the prev member
@@ -79,6 +94,25 @@ pub async fn all(
 
     let members = ring.iter().collect::<Vec<&Member>>();
     json_response(members)
+}
+
+pub async fn ring_js(
+    State(ring): State<Arc<RwLock<Ring>>>,
+    params: Query<ScriptParams>,
+) -> Result<Response<String>, std::convert::Infallible> {
+    let response = get_member_response(ring, params.id.clone()).await;
+    if response.is_none() {
+        return member_not_found();
+    }
+
+    let user_js = RING_JS
+        .replace("JSON_DATA_HERE", &serde_json::to_string(&response.unwrap()).unwrap())
+        .replace("MODE_PARAM_HERE", &params.mode.clone().unwrap_or("base".to_string()));
+
+    Ok(Response::builder()
+        .header("Content-Type", "text/javascript")
+        .body(user_js)
+        .unwrap())
 }
 
 fn temporary_redirect(url: &str) -> Result<Response<String>, std::convert::Infallible> {

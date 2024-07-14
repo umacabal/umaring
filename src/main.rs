@@ -9,7 +9,6 @@ use tower_http::cors::CorsLayer;
 mod get;
 mod ring;
 
-static RING_JS: &str = include_str!("../js/ring.js");
 #[tokio::main]
 async fn main() {
     let ring = ring::Ring::new(include_str!("../members.toml"));
@@ -37,15 +36,7 @@ async fn main() {
         .route("/:id", routing::get(get::one))
         .route("/:id/prev", routing::get(get::prev))
         .route("/:id/next", routing::get(get::next))
-        .route(
-            "/ring.js",
-            routing::get(move || async move {
-                Response::builder()
-                    .header("Content-Type", "text/javascript")
-                    .body(RING_JS.to_string())
-                    .unwrap()
-            }),
-        )
+        .route("/ring.js", routing::get(get::ring_js))
         .layer(CorsLayer::permissive())
         .with_state(ring);
 
