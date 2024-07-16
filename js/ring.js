@@ -1,6 +1,5 @@
-document.addEventListener("DOMContentLoaded", async () => {
+function initializeWebring() {
   try {
-
     const data = JSON_DATA_HERE;
     const { prev, next } = data;
 
@@ -38,6 +37,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         break;
     }
   } catch (error) {
-    console.error("Error fetching UMass Amherst webring data:", error);
+    console.error("Error initializing UMass Amherst webring data:", error);
   }
-});
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeWebring);
+} else {
+  initializeWebring();
+}
