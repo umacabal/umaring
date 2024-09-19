@@ -67,3 +67,8 @@ url = "https://jsimmonds.dev"
 id = "kodex_38"
 name = "Jeevesh"
 url = "https://jeeveshkrishna.com"
+
+[[users]]
+id = "timafei"
+name = "Timafei"
+url = "https://timafei.dev/"
