@@ -40,7 +40,10 @@ This will return a JSON object with the following format:
     }
 }
 ```
-Please pull the latest version of the webring at least once every 6 hours, but preferably once every hour. This will ensure that the webring is up to date.
+If values are being cached on a backend please pull the latest version of the webring at least once every hour, but preferably once every five minutes. 
+This will ensure that the webring is up to date.
+If this request is being done of the clients you can just do the GET every page load, optionally caching in user local storage.
+
 
 ## 88x31 Button
 If you want to add a button to your website, you can use the following image:
