@@ -72,3 +72,8 @@ url = "https://jeeveshkrishna.com"
 id = "timafei"
 name = "Timafei"
 url = "https://timafei.dev/"
+
+[[users]]
+id = "ptnote"
+name = "Josh"
+url = "https://ptnote.dev/"
