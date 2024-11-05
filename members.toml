@@ -9,6 +9,11 @@ name = "Jordan Day"
 url = "https://jordane.day"
 
 [[users]]
+id = "ozel"
+name = "Ozel Yilmazel"
+url = "https://oz03-hub.github.io/"
+
+[[users]]
 id = "kush"
 name = "Kushagra Srivastava"
 url = "https://skushagra.com"
