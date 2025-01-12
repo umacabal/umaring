@@ -1,0 +1,32 @@
+---
+kind: pipeline
+type: docker
+name: build-and-push
+
+steps:
+- name: build-and-push
+  image: plugins/docker
+  settings:
+    registry: registry.hayl.in
+    repo: registry.hayl.in/umaring
+    tags:
+      - latest
+      - ${DRONE_COMMIT_SHA:0:8}
+    dockerfile: Dockerfile
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+- name: rollout
+  image: haylinmoore/drone-rollout-restart:latest
+  pull: always
+  settings:
+    deployment: umaring
+    namespace: default
+    kubernetes_server:
+      from_secret: kubernetes_server
+    kubernetes_token:
+      from_secret: kubernetes_token
+trigger:
+  branch:
+    - main
