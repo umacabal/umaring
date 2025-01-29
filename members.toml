@@ -19,11 +19,6 @@ name = "Kushagra Srivastava"
 url = "https://skushagra.com"
 
 [[users]]
-id = "fcatalano"
-name = "Francesco Catalano"
-url = "https://www.fcatalanoanisciblog.com/"
-
-[[users]]
 id = "rporta"
 name = "Rose Porta"
 url = "https://roseporta.com"
