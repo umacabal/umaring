@@ -77,3 +77,8 @@ url = "https://timafei.dev/"
 id = "ptnote"
 name = "Josh"
 url = "https://ptnote.dev/"
+
+[[users]]
+id = "gabe"
+name = "Gabriel Ford"
+url = "https://gabefork.github.io/"
