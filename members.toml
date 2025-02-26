@@ -82,3 +82,8 @@ url = "https://ptnote.dev/"
 id = "gabe"
 name = "Gabriel Ford"
 url = "https://gabefork.github.io/"
+
+[[users]]
+id = "adi"
+name = "Aditya"
+url = "https://adityanaithani.com"
