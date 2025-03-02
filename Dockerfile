@@ -6,9 +6,7 @@ RUN apk add musl-dev
 ADD . .
 
 # Build the project
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/src/target \
-    cargo build --release
+RUN cargo build --release
 
 # Final stage
 FROM alpine:3.19
