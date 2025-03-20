@@ -92,3 +92,8 @@ url = "https://adityanaithani.com"
 id = "bdunahu"
 name = "Benjamin"
 url = "https://operationnull.com"
+
+[[users]]
+id = "iris"
+name = "Iris Chen"
+url = "https://irischen.dev"
