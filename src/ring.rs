@@ -9,7 +9,6 @@ pub struct Member {
 
 pub struct Ring {
     members: Vec<Member>,
-    mapping: Vec<usize>,
 }
 
 #[derive(Deserialize)]
@@ -22,29 +21,23 @@ impl Ring {
         let ring_source: RingSource = toml::from_str(toml).unwrap();
         let users = ring_source.users;
 
-        let mapping: Vec<usize> = (0..users.len()).collect();
-
-        Self {
-            mapping,
-            members: users,
-        }
+        Self { members: users }
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Member> {
-        let len = self.members.len();
-        (0..len).map(move |i| &self.members[self.mapping[i % len]])
+        self.members.iter()
     }
 
     pub fn get(&self, id: &str) -> Option<&Member> {
-        self.iter().find(|m| m.id == id)
+        self.members.iter().find(|m| m.id == id)
     }
 
     pub fn neighbors(&self, id: &str) -> Option<(&Member, &Member)> {
-        let index = self.iter().position(|m| m.id == id)?;
+        let index = self.members.iter().position(|m| m.id == id)?;
+        let len = self.members.len();
 
-        let prev =
-            &self.members[self.mapping[(index + self.members.len() - 1) % self.members.len()]];
-        let next = &self.members[self.mapping[(index + 1) % self.members.len()]];
+        let prev = &self.members[(index + len - 1) % len];
+        let next = &self.members[(index + 1) % len];
 
         Some((prev, next))
     }
