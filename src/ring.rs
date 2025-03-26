@@ -1,7 +1,4 @@
-use rand::{seq::SliceRandom, SeedableRng};
-use rand_chacha::ChaChaRng;
 use serde::{Deserialize, Serialize};
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Member {
@@ -25,29 +22,12 @@ impl Ring {
         let ring_source: RingSource = toml::from_str(toml).unwrap();
         let users = ring_source.users;
 
-        let mut ring = Self {
-            mapping: vec![],
+        let mapping: Vec<usize> = (0..users.len()).collect();
+
+        Self {
+            mapping,
             members: users,
-        };
-
-        ring.shuffle();
-
-        ring
-    }
-
-    pub fn shuffle(&mut self) {
-        let epoch = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or(Duration::new(1, 0))
-            .as_secs()
-            / (60 * 60 * 24 * 7); // Seed is weeks since 1970
-
-        let mut rng = ChaChaRng::seed_from_u64(epoch);
-
-        let mut mapping: Vec<usize> = (0..self.members.len()).collect();
-        mapping.shuffle(&mut rng);
-
-        self.mapping = mapping;
+        }
     }
 
     pub fn iter(&self) -> impl Iterator<Item = &Member> {

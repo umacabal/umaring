@@ -15,17 +15,6 @@ async fn main() {
 
     let ring = Arc::new(RwLock::new(ring));
 
-    let ring_clone = ring.clone();
-    tokio::spawn(async move {
-        loop {
-            tokio::time::sleep(tokio::time::Duration::from_secs(60 * 60)).await;
-
-            let mut ring = ring_clone.write().await;
-
-            ring.shuffle();
-        }
-    });
-
     let app = Router::new()
         .route(
             "/",
