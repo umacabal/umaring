@@ -1,4 +1,9 @@
 [[users]]
+id = "tbo"
+name = "Shanyu Thibaut Juneja"
+url = "https://ghast.dev"
+
+[[users]]
 id = "haylin"
 name = "Haylin Moore"
 url = "https://hayl.in"
@@ -22,11 +27,6 @@ url = "https://skushagra.com"
 id = "rporta"
 name = "Rose Porta"
 url = "https://roseporta.com"
-
-[[users]]
-id = "tbo"
-name = "Shanyu Thibaut Juneja"
-url = "https://ghast.dev"
 
 [[users]]
 id = "s3gfault"

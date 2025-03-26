@@ -8,9 +8,7 @@ edition = "2021"
 [dependencies]
 axum = { version = "0.7.4", features = ["macros"] }
 tower-http = { version = "0.5.0", features = ["cors"] }
-rand = "0.8.5"
 serde = { version = "1.0.173", features = ["derive"] }
 serde_json = "1.0.103"
 tokio = { version = "1.35.1", features = ["full"] }
 toml = "0.8.9"
-rand_chacha = "0.3.1"
