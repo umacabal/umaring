@@ -77,10 +77,9 @@ td {
   margin-bottom: 20px;
   text-decoration: none;
   font-size: 0.7em;
-  text-shadow: 0px 0px 1px #111111;
+  text-shadow: 0px 0px 1px #a3a3a3;
 }
 #addsite:hover {
   background-color: #333333;
-  text-shadow: 0px 0px 2px white;
   transition: 1s ease;
 }
