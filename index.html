@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="UMass Amherst Webring" />
+    <title>UMass Amherst Webring</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap");
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>umass amherst webring</h1>
+    </header>
+    <main>
+      <div id="memberlist">
+        <table id="members-table">
+          <tbody>
+            <!-- dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+    <footer>
+      <a id="addsite" href="https://github.com/umacabal/umaring"
+        >add your site here ❯</a
+      >
+    </footer>
+    <script>
+      async function fetchMembers() {
+        try {
+          const response = await fetch("http://0.0.0.0:3000/all"); // not exactly sure where to fetch from
+          if (!response.ok) {
+            throw new Error("Failed to fetch member list!");
+          }
+
+          const members = await response.json();
+          const tableBody = document.querySelector("#members-table tbody");
+
+          members.forEach((member, idx) => {
+            if (idx % 3 === 0) {
+              row = document.createElement("tr");
+              tableBody.appendChild(row);
+            }
+
+            // url cell
+            const cell = document.createElement("td");
+            const link = document.createElement("a");
+            link.href = member.url;
+            link.textContent = member.name; // aesthetically i think .id looks better than .name, but we can change
+            cell.appendChild(link);
+            row.appendChild(cell);
+
+            // stray cells
+            const strays = members.length % 3;
+            if (strays > 0) {
+              for (let i = 0; i < strays; i++) {
+                const strayCell = document.createElement("td");
+                row.appendChild(strayCell);
+              }
+            }
+          });
+        } catch (error) {
+          console.error("Error fetching members:", error);
+          const tableBody = document.querySelector("#members-table tbody");
+          const row = document.createElement("tr");
+          const cell = document.createElement("td");
+          cell.colSpan = 2;
+          cell.textContent = "Failed to load members.";
+          row.appendChild(cell);
+          tableBody.appendChild(row);
+        }
+      }
+
+      fetchMembers();
+    </script>
+  </body>
+</html>
