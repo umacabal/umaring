@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="UMass Amherst Webring" />
     <title>UMass Amherst Webring</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="/styles.css" />
     <style>
       @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap");
     </style>
@@ -31,7 +31,7 @@
     <script>
       async function fetchMembers() {
         try {
-          const response = await fetch("http://0.0.0.0:3000/all"); // not exactly sure where to fetch from
+          const response = await fetch("/all"); // not exactly sure where to fetch from
           if (!response.ok) {
             throw new Error("Failed to fetch member list!");
           }
@@ -49,7 +49,7 @@
             const cell = document.createElement("td");
             const link = document.createElement("a");
             link.href = member.url;
-            link.textContent = member.id; // aesthetically i think .id looks better than .name, but this is up for debate
+            link.textContent = member.name; // aesthetically i think .id looks better than .name, but this is up for debate
             cell.appendChild(link);
             row.appendChild(cell);
 

@@ -55,7 +55,7 @@ table {
   align-items: center;
   justify-content: center;
   flex-flow: row wrap;
-  width: 65%;
+  /* width: 65%; */
   gap: 60px;
   top: 0px;
   border-collapse: collapse;
