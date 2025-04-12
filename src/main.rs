@@ -1,5 +1,5 @@
 use axum::{
-    response::{Redirect, Response},
+    response::Response,
     routing, Router,
 };
 use std::sync::Arc;
@@ -27,10 +27,8 @@ async fn main() {
     });
 
     let app = Router::new()
-        .route(
-            "/",
-            routing::get(|| async { Redirect::temporary("https://github.com/umacabal/umaring") }),
-        )
+        .route("/", routing::get(get::landing_page))
+        .route("/styles.css", routing::get(get::serve_css))
         .route("/health", routing::get(health))
         .route("/all", routing::get(get::all))
         .route("/:id", routing::get(get::one))
