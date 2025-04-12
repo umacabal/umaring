@@ -51,7 +51,7 @@ pub async fn landing_page() -> Result<Response<String>, std::convert::Infallible
             .unwrap()),
         Err(_) => Ok(Response::builder()
             .status(404)
-            .body("HTML file not found".to_string())
+            .body("HTML not found".to_string())
             .unwrap()),
     }
 }
