@@ -1,11 +1,10 @@
 use axum::{
     extract::{Path, Query, State},
-    response::Response,
-    http::header::CONTENT_TYPE,
+    response::Response
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tokio::{sync::RwLock, fs::read_to_string};
+use tokio::{sync::RwLock};
 
 use crate::ring::{Member, Ring};
 
@@ -41,32 +40,6 @@ async fn get_member_response(ring: Arc<RwLock<Ring>>, id: String) -> Option<Memb
         next: next.clone(),
         prev: prev.clone(),
     })
-}
-
-pub async fn landing_page() -> Result<Response<String>, std::convert::Infallible> {
-    match read_to_string("index.html").await {
-        Ok(content) => Ok(Response::builder()
-            .header(CONTENT_TYPE, "text/html")
-            .body(content)
-            .unwrap()),
-        Err(_) => Ok(Response::builder()
-            .status(404)
-            .body("HTML not found".to_string())
-            .unwrap()),
-    }
-}
-
-pub async fn serve_css() -> Result<Response<String>, std::convert::Infallible> {
-    match read_to_string("styles.css").await {
-        Ok(content) => Ok(Response::builder()
-            .header(CONTENT_TYPE, "text/css")
-            .body(content)
-            .unwrap()),
-        Err(_) => Ok(Response::builder()
-            .status(404)
-            .body("CSS not found".to_string())
-            .unwrap()),
-    }
 }
 
 pub async fn one(

@@ -1,10 +1,13 @@
+use axum::routing::get;
 use axum::{
     response::Response,
     routing, Router,
 };
-use std::sync::Arc;
+use std::{sync::Arc};
 use tokio::sync::RwLock;
 use tower_http::cors::CorsLayer;
+use tower_http::services::ServeDir;
+
 
 mod get;
 mod ring;
@@ -26,9 +29,12 @@ async fn main() {
         }
     });
 
+    let landing_page = ServeDir::new("public")
+    .append_index_html_on_directories(true);
+
     let app = Router::new()
-        .route("/", routing::get(get::landing_page))
-        .route("/styles.css", routing::get(get::serve_css))
+        .route("/", get(|| async {"not found"}))
+        .nest_service("/public", landing_page)
         .route("/health", routing::get(health))
         .route("/all", routing::get(get::all))
         .route("/:id", routing::get(get::one))
