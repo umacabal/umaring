@@ -1,4 +1,3 @@
-use axum::routing::get;
 use axum::{
     response::Response,
     routing, Router,
@@ -28,19 +27,19 @@ async fn main() {
             ring.shuffle();
         }
     });
-
+    
+    // serve static files from /public
     let landing_page = ServeDir::new("public")
     .append_index_html_on_directories(true);
 
     let app = Router::new()
-        .route("/", get(|| async {"not found"}))
-        .nest_service("/public", landing_page)
         .route("/health", routing::get(health))
         .route("/all", routing::get(get::all))
         .route("/:id", routing::get(get::one))
         .route("/:id/prev", routing::get(get::prev))
         .route("/:id/next", routing::get(get::next))
         .route("/ring.js", routing::get(get::ring_js))
+        .fallback_service(landing_page)
         .layer(CorsLayer::permissive())
         .with_state(ring);
 
