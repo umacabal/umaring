@@ -40,7 +40,8 @@ async fn main() {
         .layer(CorsLayer::permissive())
         .with_state(ring);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let bind_addr = std::env::var("BIND").unwrap_or_else(|_| "0.0.0.0:3000".to_string());
+    let listener = tokio::net::TcpListener::bind(&bind_addr).await.unwrap();
 
     println!("Listening on: {}", listener.local_addr().unwrap());
 
