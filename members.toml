@@ -24,11 +24,6 @@ name = "Rose Porta"
 url = "https://roseporta.com"
 
 [[users]]
-id = "tbo"
-name = "Shanyu Thibaut Juneja"
-url = "https://ghast.dev"
-
-[[users]]
 id = "stelleron"
 name = "Shreyas Donti"
 url = "https://stelleron.github.io/"
@@ -47,11 +42,6 @@ url = "https://leon3321.is-a.dev"
 id = "rpil"
 name = "Roland Pilenyi"
 url = "https://rpil.dev"
-
-[[users]]
-id = "squirrelly"
-name = "August"
-url = "https://squirrelly.glykon.cc"
 
 [[users]]
 id = "theblushirtdude"
