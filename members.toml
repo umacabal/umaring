@@ -92,3 +92,8 @@ url = "https://operationnull.com"
 id = "iris"
 name = "Iris Chen"
 url = "https://irischen.dev"
+
+[[users]]
+id = "vishnuvardhanbr"
+name = "Vishnu Vardhan Reddy"
+url = "https://vishnuvardhanbr.com"
