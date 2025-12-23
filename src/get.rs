@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
-use crate::ring::{Member, Ring};
+use crate::ring::{HealthStatus, Member, Ring};
 
 static RING_JS: &str = include_str!("../js/ring.js");
 
@@ -136,4 +136,109 @@ fn member_not_found() -> Result<Response<String>, std::convert::Infallible> {
         .status(404)
         .body("Member not found".to_string())
         .unwrap())
+}
+
+#[derive(Serialize)]
+struct MemberStatusResponse {
+    id: String,
+    name: String,
+    url: String,
+    status: HealthStatus,
+    status_description: &'static str,
+    healthy: bool,
+    last_checked: Option<u64>,
+    last_checked_ago: Option<String>,
+}
+
+#[derive(Serialize, Default)]
+struct ByStatus {
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    unknown: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    ring_js: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    api_js: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    redirect_links: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    static_html: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    js_other: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    down: Vec<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    missing: Vec<String>,
+}
+
+#[derive(Serialize)]
+struct StatusResponse {
+    total: usize,
+    healthy: usize,
+    unhealthy: usize,
+    by_status: ByStatus,
+    members: Vec<MemberStatusResponse>,
+}
+
+pub async fn status(
+    State(ring): State<Arc<RwLock<Ring>>>,
+) -> Result<Response<String>, std::convert::Infallible> {
+    let ring = ring.read().await;
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or(std::time::Duration::new(0, 0))
+        .as_secs();
+
+    let members: Vec<MemberStatusResponse> = ring
+        .all_with_health()
+        .into_iter()
+        .map(|(member, health)| {
+            let last_checked_ago = health.last_checked.map(|ts| {
+                let secs = now.saturating_sub(ts);
+                if secs < 60 {
+                    format!("{}s ago", secs)
+                } else if secs < 3600 {
+                    format!("{}m ago", secs / 60)
+                } else {
+                    format!("{}h ago", secs / 3600)
+                }
+            });
+
+            MemberStatusResponse {
+                id: member.id.clone(),
+                name: member.name.clone(),
+                url: member.url.clone(),
+                status: health.status.clone(),
+                status_description: health.status.description(),
+                healthy: health.status.is_healthy(),
+                last_checked: health.last_checked,
+                last_checked_ago,
+            }
+        })
+        .collect();
+
+    let healthy_count = members.iter().filter(|m| m.healthy).count();
+
+    let mut by_status = ByStatus::default();
+    for m in &members {
+        match m.status {
+            HealthStatus::Unknown => by_status.unknown.push(m.id.clone()),
+            HealthStatus::HealthyRingJs => by_status.ring_js.push(m.id.clone()),
+            HealthStatus::HealthyApiJs => by_status.api_js.push(m.id.clone()),
+            HealthStatus::HealthyRedirectLinks => by_status.redirect_links.push(m.id.clone()),
+            HealthStatus::HealthyStatic => by_status.static_html.push(m.id.clone()),
+            HealthStatus::HealthyJsOther => by_status.js_other.push(m.id.clone()),
+            HealthStatus::UnhealthyDown => by_status.down.push(m.id.clone()),
+            HealthStatus::UnhealthyMissing => by_status.missing.push(m.id.clone()),
+        }
+    }
+
+    let response = StatusResponse {
+        total: members.len(),
+        healthy: healthy_count,
+        unhealthy: members.len() - healthy_count,
+        by_status,
+        members,
+    };
+
+    json_response(response)
 }

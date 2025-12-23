@@ -7,6 +7,7 @@ use tokio::sync::RwLock;
 use tower_http::cors::CorsLayer;
 
 mod get;
+mod health;
 mod ring;
 
 #[tokio::main]
@@ -15,6 +16,7 @@ async fn main() {
 
     let ring = Arc::new(RwLock::new(ring));
 
+    // Shuffle the ring every hour
     let ring_clone = ring.clone();
     tokio::spawn(async move {
         loop {
@@ -26,12 +28,21 @@ async fn main() {
         }
     });
 
+    // Initial health scan of all members on startup
+    let ring_clone = ring.clone();
+    tokio::spawn(async move {
+        health::scan_all(ring_clone.clone()).await;
+        // After initial scan, start the per-minute check loop
+        health::health_check_loop(ring_clone).await;
+    });
+
     let app = Router::new()
         .route(
             "/",
             routing::get(|| async { Redirect::temporary("https://github.com/umacabal/umaring") }),
         )
         .route("/health", routing::get(health))
+        .route("/status", routing::get(get::status))
         .route("/all", routing::get(get::all))
         .route("/:id", routing::get(get::one))
         .route("/:id/prev", routing::get(get::prev))

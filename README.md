@@ -6,6 +6,7 @@ It is a collection of personal websites, blogs, and other web pages.
 ## How to join
 1. Add your website to the members.toml and submit a pull request.
 2. Once accepted make sure to add the webring to your website in some way.
+3. The webring will scan your website every ~30 minutes to check for the webring. We do this to avoid having broken links in the chain. If you believe your site is setup properly but is not showing up in the webring make an issue.
 
 ### Using our script
 Add the following script to your website:
