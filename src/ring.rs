@@ -134,12 +134,48 @@ impl Ring {
 
     pub fn neighbors(&self, id: &str) -> Option<(&Member, &Member)> {
         let healthy = self.healthy_indices();
-        let index = healthy.iter().position(|&i| self.members[i].id == id)?;
 
-        let prev_idx = healthy[(index + healthy.len() - 1) % healthy.len()];
-        let next_idx = healthy[(index + 1) % healthy.len()];
+        // First check if the member exists at all
+        let member_idx = self.members.iter().position(|m| m.id == id)?;
 
-        Some((&self.members[prev_idx], &self.members[next_idx]))
+        // Check if member is in the healthy list
+        if let Some(index) = healthy.iter().position(|&i| i == member_idx) {
+            // Member is healthy, return their actual neighbors
+            let prev_idx = healthy[(index + healthy.len() - 1) % healthy.len()];
+            let next_idx = healthy[(index + 1) % healthy.len()];
+            return Some((&self.members[prev_idx], &self.members[next_idx]));
+        }
+
+        // Member is unhealthy - find where they would be in the ring
+        // and return the neighbors they would have if they were healthy
+        let member_mapping_pos = self.mapping.iter().position(|&i| i == member_idx)?;
+
+        // Find the prev healthy member (search backwards in mapping)
+        let mut prev_idx = None;
+        for offset in 1..=self.mapping.len() {
+            let check_pos = (member_mapping_pos + self.mapping.len() - offset) % self.mapping.len();
+            let check_idx = self.mapping[check_pos];
+            if self.health[check_idx].status.is_healthy() {
+                prev_idx = Some(check_idx);
+                break;
+            }
+        }
+
+        // Find the next healthy member (search forwards in mapping)
+        let mut next_idx = None;
+        for offset in 1..=self.mapping.len() {
+            let check_pos = (member_mapping_pos + offset) % self.mapping.len();
+            let check_idx = self.mapping[check_pos];
+            if self.health[check_idx].status.is_healthy() {
+                next_idx = Some(check_idx);
+                break;
+            }
+        }
+
+        match (prev_idx, next_idx) {
+            (Some(p), Some(n)) => Some((&self.members[p], &self.members[n])),
+            _ => None, // No healthy members at all
+        }
     }
 
     /// Get the next member to check and advance the index
