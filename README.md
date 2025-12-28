@@ -9,7 +9,7 @@ It is a collection of personal websites, blogs, and other web pages.
 3. The webring will scan your website every ~30 minutes to check for the webring. We do this to avoid having broken links in the chain. If you believe your site is setup properly but is not showing up in the webring make an issue.
 
 ### Using our script
-> [!Using the script is often not the best choice]  
+> [!Warning]  
 > If your website is powered by a frontend framework like Svelte, Vue, or React using the script might have strange results. It is suggested to write the integration yourself with the HTTP API indicated below. It's not scary, it's just a `fetch` call.
 
 Add the following script to your website:
