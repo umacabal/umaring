@@ -1,10 +1,10 @@
 use axum::{
     extract::{Path, Query, State},
-    response::Response,
+    response::Response
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tokio::sync::RwLock;
+use tokio::{sync::RwLock};
 
 use crate::ring::{HealthStatus, Member, Ring};
 
