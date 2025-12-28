@@ -1,10 +1,12 @@
 use axum::{
-    response::{Redirect, Response},
+    response::Response,
     routing, Router,
 };
-use std::sync::Arc;
+use std::{sync::Arc};
 use tokio::sync::RwLock;
 use tower_http::cors::CorsLayer;
+use tower_http::services::ServeDir;
+
 
 mod get;
 mod health;
@@ -27,6 +29,10 @@ async fn main() {
             ring.shuffle();
         }
     });
+    
+    // serve static files from /public
+    let landing_page = ServeDir::new("public")
+    .append_index_html_on_directories(true);
 
     // Initial health scan of all members on startup
     let ring_clone = ring.clone();
@@ -37,10 +43,6 @@ async fn main() {
     });
 
     let app = Router::new()
-        .route(
-            "/",
-            routing::get(|| async { Redirect::temporary("https://github.com/umacabal/umaring") }),
-        )
         .route("/health", routing::get(health))
         .route("/status", routing::get(get::status))
         .route("/all", routing::get(get::all))
@@ -48,6 +50,7 @@ async fn main() {
         .route("/:id/prev", routing::get(get::prev))
         .route("/:id/next", routing::get(get::next))
         .route("/ring.js", routing::get(get::ring_js))
+        .fallback_service(landing_page)
         .layer(CorsLayer::permissive())
         .with_state(ring);
 
