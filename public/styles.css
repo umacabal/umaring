@@ -1,0 +1,109 @@
+header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 65%;
+}
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 100vh;
+  flex-direction: column;
+  letter-spacing: 0.1em;
+
+  background-color: #111111;
+
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 400;
+
+  transition: all 1s ease;
+}
+
+main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-direction: column;
+
+  width: 65%;
+}
+
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-direction: column;
+  padding: 20px;
+}
+
+h1,
+h2 {
+  text-align: center;
+  margin-bottom: 50px;
+
+  color: #d9d9d9;
+
+  font-size: 45px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+a {
+  color: #a3a3a3;
+
+  text-decoration: none;
+
+  transition: color 0.3s ease;
+}
+a:hover {
+  color: #d9d9d9;
+}
+
+hr {
+  width: 65%;
+  height: 1px;
+
+  background-color: #d9d9d9;
+  border: none;
+}
+
+#list {
+  margin: 0px;
+  padding: 0px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-flow: row wrap;
+
+  margin-bottom: 50px;
+
+  list-style: none;
+  gap: 40px;
+  top: 0px;
+  border-collapse: collapse;
+}
+
+#addsite {
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+
+  background-color: #222222;
+  color: #d9d9d9;
+
+  text-align: center;
+  text-decoration: none;
+  font-size: 0.9em;
+
+  opacity: 0.8;
+}
+#addsite:hover {
+  background-color: #333333;
+  transition: 1s ease;
+}
