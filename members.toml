@@ -112,3 +112,8 @@ url = "https://jerinthomas.in"
 id = "devaanand19"
 name = "Deva Anand"
 url = "https://devaanand.com"
+
+[[users]]
+id = "trentmaziarz"
+name = "Trent Maziarz"
+url = "https://trentmaziarz.com/"
