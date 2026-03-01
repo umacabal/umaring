@@ -22,79 +22,78 @@ redirect_html() {
 REOF
 }
 
+detect_domain() {
+  local text="$1"
+  echo "$text" | grep -qi 'umaring\.mkr\.cx' && { echo "mkr.cx"; return; }
+  echo "$text" | grep -qi 'umaring\.github\.io' && { echo "github.io"; return; }
+  echo "unknown"
+}
+
+# outputs: status domain (two lines)
 check_member() {
   local url="$1"
   local html
-  html=$(curl -sfL --connect-timeout 2 --max-time 5 "$url" 2>/dev/null) || { echo "offline"; return; }
+  html=$(curl -sfL --connect-timeout 2 --max-time 5 "$url" 2>/dev/null) || { printf "offline\nunknown"; return; }
 
   local scripts
   scripts=$(echo "$html" | grep -oiE 'src=['"'"'"]?[^'"'"'" >]+' | sed "s/^src=['\"]\\?//")
 
-  # check for our ring.js embed
   for src in $scripts; do
-    echo "$src" | grep -qiE 'umaring\.(mkr\.cx|github\.io)/ring\.js' && { echo "ring.js"; return; }
+    if echo "$src" | grep -qiE 'umaring\.(mkr\.cx|github\.io)/ring\.js'; then
+      printf "ring.js\n%s" "$(detect_domain "$src")"
+      return
+    fi
   done
 
-  # check linked JS files for umaring references
   for src in $scripts; do
+    case "$src" in *.js|*.js\?*) ;; *) continue ;; esac
     case "$src" in
       http*) ;;
       //*) src="https:$src" ;;
       /*) src="${url%/}$src" ;;
       *) src="${url%/}/$src" ;;
     esac
-    curl -sfL --connect-timeout 2 --max-time 5 "$src" 2>/dev/null | grep -qi "umaring" && { echo "js"; return; }
+    local js
+    js=$(curl -sfL --connect-timeout 2 --max-time 5 "$src" 2>/dev/null) || continue
+    if echo "$js" | grep -qi "umaring"; then
+      printf "js\n%s" "$(detect_domain "$js")"
+      return
+    fi
   done
 
-  echo "$html" | grep -qi "umaring" && { echo "html"; return; }
-  echo "missing"
+  if echo "$html" | grep -qi "umaring"; then
+    printf "html\n%s" "$(detect_domain "$html")"
+    return
+  fi
+  printf "missing\nunknown"
 }
 
-
-check() {
-  local shuffled=$(shuffle)
-  local len=$(echo "$shuffled" | jq 'length')
-  local tmpdir=$(mktemp -d)
-  for i in $(seq 0 $((len - 1))); do
-    local url=$(echo "$shuffled" | jq -r ".[$i].url")
-    ( check_member "$url" > "$tmpdir/$i" ) &
-  done
-  wait
-  for i in $(seq 0 $((len - 1))); do
-    local m=$(echo "$shuffled" | jq -c ".[$i]")
-    local url=$(echo "$m" | jq -r '.url')
-    local id=$(echo "$m" | jq -r '.id')
-    printf "%8s: %s (%s)\n" "$(cat "$tmpdir/$i")" "$id" "$url"
-  done
-  rm -rf "$tmpdir"
-}
-
-status_page() {
-  local statuses="$1"
+render_page() {
+  local title="$1" data="$2" field="$3"
   local date=$(date -u '+%Y-%m-%d %H:%M UTC')
-  cat <<'HEADER'
+  cat <<HEADER
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>UMass Ring Status</title>
+<title>$title</title>
 <style>
 body { font-family: monospace; max-width: 640px; margin: 40px auto; padding: 0 20px; background: #111; color: #ccc; }
 h1 { font-size: 1.2em; color: #fff; }
 table { border-collapse: collapse; width: 100%; }
 td { padding: 4px 8px; }
 a { color: #8bf; }
-.ring\.js, .js, .html { color: #6e6; }
-.missing { color: #fc6; }
-.offline { color: #f66; }
+.ring\\.js, .js, .html, .github\\.io { color: #6e6; }
+.missing, .mkr\\.cx { color: #fc6; }
+.offline, .unknown { color: #f66; }
 .time { color: #666; font-size: 0.85em; margin-top: 20px; }
 </style>
 </head>
 <body>
-<h1>UMass Ring Status</h1>
+<h1>$title</h1>
 <table>
 HEADER
-  echo "$statuses" | jq -r '.[] | "<tr><td class=\"\(.status)\"><b>\(.status)</b></td><td><a href=\"\(.url)\">\(.name)</a></td></tr>"'
+  echo "$data" | jq -r --arg f "$field" '.[] | "<tr><td class=\"\(.[$f])\"><b>\(.[$f])</b></td><td><a href=\"\(.url)\">\(.name)</a></td></tr>"'
   cat <<FOOTER
 </table>
 <p class="time">Last checked: $date</p>
@@ -122,6 +121,45 @@ write_member_files() {
   redirect_html "$next_url" "$next_name" > "$OUT/$id/next/index.html"
 }
 
+# run check_member in parallel, collect results into $tmpdir/{0,1,...}
+parallel_check() {
+  local shuffled="$1"
+  local len=$(echo "$shuffled" | jq 'length')
+  local tmpdir=$(mktemp -d)
+  for i in $(seq 0 $((len - 1))); do
+    local url=$(echo "$shuffled" | jq -r ".[$i].url")
+    ( check_member "$url" > "$tmpdir/$i" ) &
+  done
+  wait
+  echo "$tmpdir"
+}
+
+check() {
+  local shuffled=$(shuffle)
+  local len=$(echo "$shuffled" | jq 'length')
+  local tmpdir=$(parallel_check "$shuffled")
+  for i in $(seq 0 $((len - 1))); do
+    local id=$(echo "$shuffled" | jq -r ".[$i].id")
+    local url=$(echo "$shuffled" | jq -r ".[$i].url")
+    local status=$(sed -n '1p' "$tmpdir/$i")
+    printf "%8s: %s (%s)\n" "$status" "$id" "$url"
+  done
+  rm -rf "$tmpdir"
+}
+
+check_domain() {
+  local shuffled=$(shuffle)
+  local len=$(echo "$shuffled" | jq 'length')
+  local tmpdir=$(parallel_check "$shuffled")
+  for i in $(seq 0 $((len - 1))); do
+    local id=$(echo "$shuffled" | jq -r ".[$i].id")
+    local url=$(echo "$shuffled" | jq -r ".[$i].url")
+    local domain=$(sed -n '2p' "$tmpdir/$i")
+    printf "%10s: %s (%s)\n" "$domain" "$id" "$url"
+  done
+  rm -rf "$tmpdir"
+}
+
 build() {
   local OUT="out"
   rm -rf "$OUT"
@@ -130,14 +168,8 @@ build() {
   local shuffled=$(shuffle)
   local total=$(echo "$shuffled" | jq 'length')
 
-  # check liveness in parallel
-  echo "Checking liveness..." >&2
-  local tmpdir=$(mktemp -d)
-  for i in $(seq 0 $((total - 1))); do
-    local url=$(echo "$shuffled" | jq -r ".[$i].url")
-    ( check_member "$url" > "$tmpdir/$i" ) &
-  done
-  wait
+  echo "Checking members..." >&2
+  local tmpdir=$(parallel_check "$shuffled")
 
   local alive="[]"
   local statuses="[]"
@@ -146,9 +178,10 @@ build() {
     local url=$(echo "$m" | jq -r '.url')
     local id=$(echo "$m" | jq -r '.id')
     local name=$(echo "$m" | jq -r '.name')
-    local status=$(cat "$tmpdir/$i")
-    statuses=$(echo "$statuses" | jq -c --arg s "$status" --arg name "$name" --arg url "$url" \
-      '. + [{status: $s, name: $name, url: $url}]')
+    local status=$(sed -n '1p' "$tmpdir/$i")
+    local domain=$(sed -n '2p' "$tmpdir/$i")
+    statuses=$(echo "$statuses" | jq -c --arg s "$status" --arg d "$domain" --arg name "$name" --arg url "$url" \
+      '. + [{status: $s, domain: $d, name: $name, url: $url}]')
     case "$status" in
       ring.js|js|html)
         alive=$(echo "$alive" | jq -c --argjson m "$m" '. + [$m]')
@@ -173,7 +206,6 @@ build() {
   mkdir -p "$OUT/all"
   echo "$alive" | jq -c '.' > "$OUT/all/index.html"
 
-  # alive members get normal ring navigation
   for i in $(seq 0 $((len - 1))); do
     local member=$(echo "$alive" | jq -c ".[$i]")
     local prev=$(echo "$alive" | jq -c ".[(($i - 1 + $len) % $len)]")
@@ -182,7 +214,6 @@ build() {
     write_member_files "$OUT" "$id" "$member" "$prev" "$next"
   done
 
-  # dead members link to first/last of the live ring
   for i in $(seq 0 $((total - 1))); do
     local m=$(echo "$shuffled" | jq -c ".[$i]")
     local id=$(echo "$m" | jq -r '.id')
@@ -193,8 +224,9 @@ build() {
   local ring_data=$(echo "$alive" | jq -c '[.[] | {id, name, url}]')
   sed "s|RING_DATA_HERE|$ring_data|" ring.js > "$OUT/ring.js"
 
-  mkdir -p "$OUT/status"
-  status_page "$statuses" > "$OUT/status/index.html"
+  mkdir -p "$OUT/status" "$OUT/migration"
+  render_page "UMass Ring Status" "$statuses" "status" > "$OUT/status/index.html"
+  render_page "UMass Ring Migration" "$statuses" "domain" > "$OUT/migration/index.html"
 
   cp umass.png "$OUT/umass.png"
 
@@ -204,5 +236,6 @@ build() {
 case "${1:-build}" in
   build) build ;;
   check) check ;;
-  *) echo "Usage: $0 [build|check]" >&2; exit 1 ;;
+  check_domain) check_domain ;;
+  *) echo "Usage: $0 [build|check|check_domain]" >&2; exit 1 ;;
 esac
