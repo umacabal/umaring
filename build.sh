@@ -52,6 +52,7 @@ check_member() {
     fi
   done
 
+  local jstmp=$(mktemp)
   for src in $scripts; do
     case "$src" in *.js|*.js\?*) ;; *) continue ;; esac
     case "$src" in
@@ -60,13 +61,14 @@ check_member() {
       /*) src="${url%/}$src" ;;
       *) src="${url%/}/$src" ;;
     esac
-    local js
-    js=$(curl -sfL --connect-timeout 2 --max-time 5 "$src" 2>/dev/null) || continue
-    if echo "$js" | grep -qi "umaring"; then
-      printf "js\n%s" "$(detect_domain "$js")"
+    curl -sfL --connect-timeout 2 --max-time 5 "$src" -o "$jstmp" 2>/dev/null || continue
+    if grep -qi "umaring" "$jstmp"; then
+      printf "js\n%s" "$(detect_domain "$(cat "$jstmp")")"
+      rm -f "$jstmp"
       return
     fi
   done
+  rm -f "$jstmp"
 
   if echo "$html" | grep -qi "umaring"; then
     printf "html\n%s" "$(detect_domain "$html")"
@@ -91,8 +93,8 @@ table { border-collapse: collapse; width: 100%; }
 td { padding: 4px 8px; }
 a { color: #8bf; }
 .member\\.js, .js, .html, .github\\.io { color: #6e6; }
-.ring\\.js, .missing, .mkr\\.cx { color: #fc6; }
-.offline, .unknown { color: #f66; }
+.ring\\.js, .mkr\\.cx { color: #fc6; }
+.missing, .offline, .unknown { color: #f66; }
 .time { color: #666; font-size: 0.85em; margin-top: 20px; }
 </style>
 </head>
