@@ -77,34 +77,70 @@ check_member() {
   printf "missing\nunknown"
 }
 
-render_page() {
-  local title="$1" data="$2" field="$3"
+index_page() {
+  local data="$1"
   local date=$(date -u '+%Y-%m-%d %H:%M UTC')
-  cat <<HEADER
+  cat <<'HEADER'
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<title>$title</title>
+<title>UMass Webring</title>
 <style>
 body { font-family: monospace; max-width: 640px; margin: 40px auto; padding: 0 20px; background: #111; color: #ccc; }
-h1 { font-size: 1.2em; color: #fff; }
+h1 { font-size: 1.4em; color: #fff; }
+h2 { font-size: 1.1em; color: #fff; margin-top: 30px; }
+p { line-height: 1.5; }
+a { color: #8bf; }
 table { border-collapse: collapse; width: 100%; }
 td { padding: 4px 8px; }
-a { color: #8bf; }
-.member\\.js, .js, .html, .github\\.io { color: #6e6; }
-.ring\\.js, .mkr\\.cx { color: #fc6; }
-.missing, .offline, .unknown { color: #f66; }
+.ok { color: #6e6; }
+.warn { color: #fc6; }
+.err { color: #f66; }
+.tag { font-size: 0.85em; }
+.note { color: #999; font-size: 0.9em; line-height: 1.6; }
 .time { color: #666; font-size: 0.85em; margin-top: 20px; }
 </style>
 </head>
 <body>
-<h1>$title</h1>
+<h1>UMass Ring</h1>
+<p>A webring for UMass Amherst students and alumni.
+Want to join? Add yourself to
+<a href="https://github.com/umaring/umaring" target="_blank">the repo</a>
+and submit a PR.</p>
+
+<h2>Members</h2>
 <table>
 HEADER
-  echo "$data" | jq -r --arg f "$field" '.[] | "<tr><td class=\"\(.[$f])\"><b>\(.[$f])</b></td><td><a href=\"\(.url)\">\(.name)</a></td></tr>"'
-  cat <<FOOTER
+  echo "$data" | jq -r '.[] |
+    def tag(cls; txt): " <span class=\"tag \(cls)\">\(txt)</span>";
+    def status_tag:
+      if .status == "ring.js" then tag("warn"; "ring.js")
+      elif .status == "missing" then tag("err"; "missing")
+      elif .status == "offline" then tag("err"; "offline")
+      else ""
+      end;
+    def domain_tag:
+      if .domain == "mkr.cx" then tag("warn"; "mkr.cx")
+      else ""
+      end;
+    "<tr><td><a href=\"\(.url)\" target=\"_blank\">\(.name)</a>\(status_tag)\(domain_tag)</td></tr>"'
+  cat <<'NOTES'
 </table>
+
+<h2>Migration notes</h2>
+<p class="note">
+<span class="warn">mkr.cx</span> — The <b>umaring.mkr.cx</b> domain is being
+retired. Update your URLs to use <b>umaring.github.io</b> instead.<br><br>
+<span class="warn">ring.js</span> — The shared <b>ring.js</b> script is
+being replaced with per-member scripts. Switch from<br>
+<code>&lt;script src=".../ring.js?id=you"&gt;&lt;/script&gt;</code> to<br>
+<code>&lt;script src="https://umaring.github.io/<b>you</b>.js"&gt;&lt;/script&gt;</code><br><br>
+Most members will need to do both at once.
+</p>
+NOTES
+  cat <<FOOTER
+<img src="/umass.png" alt="UMass Ring" style="image-rendering: pixelated;">
 <p class="time">Last checked: $date</p>
 </body>
 </html>
@@ -212,8 +248,6 @@ build() {
   local first=$(echo "$alive" | jq -c '.[0]')
   local last=$(echo "$alive" | jq -c '.[-1]')
 
-  redirect_html "https://github.com/umaring/umaring" "UMass Ring" > "$OUT/index.html"
-
   mkdir -p "$OUT/health"
   echo -n "OK" > "$OUT/health/index.html"
 
@@ -238,9 +272,9 @@ build() {
   local ring_data=$(echo "$alive" | jq -c '[.[] | {id, name, url}]')
   sed "s|RING_DATA_HERE|$ring_data|" ring.js > "$OUT/ring.js"
 
-  mkdir -p "$OUT/status" "$OUT/migration"
-  render_page "UMass Ring Status" "$statuses" "status" > "$OUT/status/index.html"
-  render_page "UMass Ring Migration" "$statuses" "domain" > "$OUT/migration/index.html"
+  index_page "$statuses" > "$OUT/index.html"
+  mkdir -p "$OUT/status"
+  index_page "$statuses" > "$OUT/status/index.html"
 
   cp umass.png "$OUT/umass.png"
 
