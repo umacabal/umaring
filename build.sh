@@ -3,6 +3,7 @@ set -euo pipefail
 
 MEMBERS=$(cat members.json)
 WEEK=$(( $(date +%s) / (7 * 86400) ))
+UA="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 
 shuffle() {
   echo "$MEMBERS" | jq -c '.[]' | while read -r m; do
@@ -33,7 +34,7 @@ detect_domain() {
 check_member() {
   local url="$1" id="$2"
   local html
-  html=$(curl -sfL --connect-timeout 5 --max-time 10 "$url" 2>/dev/null) || { printf "offline\nunknown"; return; }
+  html=$(curl -sfL -A "$UA" --connect-timeout 5 --max-time 10 "$url" 2>/dev/null) || { printf "offline\nunknown"; return; }
 
   local scripts
   scripts=$(echo "$html" | grep -oiE 'src=['"'"'"]?[^'"'"'" >]+' | sed "s/^src=['\"]\\?//")
@@ -61,7 +62,7 @@ check_member() {
       /*) src="${url%/}$src" ;;
       *) src="${url%/}/$src" ;;
     esac
-    curl -sfL --connect-timeout 5 --max-time 10 "$src" -o "$jstmp" 2>/dev/null || continue
+    curl -sfL -A "$UA" --connect-timeout 5 --max-time 10 "$src" -o "$jstmp" 2>/dev/null || continue
     if grep -qi "umaring" "$jstmp"; then
       printf "js\n%s" "$(detect_domain "$(cat "$jstmp")")"
       rm -f "$jstmp"
