@@ -24,7 +24,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - run: bash build.sh
+      - run: bash build.sh build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out
