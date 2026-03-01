@@ -25,9 +25,10 @@ REOF
 
 detect_domain() {
   local text="$1"
-  echo "$text" | grep -qi 'umaring\.mkr\.cx' && { echo "mkr.cx"; return; }
-  echo "$text" | grep -qi 'umaring\.github\.io' && { echo "github.io"; return; }
-  echo "unknown"
+  if [[ "${text,,}" == *"umaring.mkr.cx"* ]]; then echo "mkr.cx"
+  elif [[ "${text,,}" == *"umaring.github.io"* ]]; then echo "github.io"
+  else echo "unknown"
+  fi
 }
 
 # outputs: status domain (two lines)
@@ -35,7 +36,15 @@ check_member() {
   local url="$1" id="$2"
   local html errtmp
   errtmp=$(mktemp)
-  html=$(curl -fL -A "$UA" --connect-timeout 5 --max-time 10 "$url" 2>"$errtmp") || { echo "  $id: $(cat "$errtmp")" >&2; rm -f "$errtmp"; printf "offline\nunknown"; return; }
+  local http_code
+  html=$(curl -sL -A "$UA" --connect-timeout 5 --max-time 10 -w '\n%{http_code}' "$url" 2>"$errtmp")
+  http_code=$(echo "$html" | tail -1)
+  html=$(echo "$html" | sed '$d')
+  case "$http_code" in
+    2*|3*) ;;
+    403) rm -f "$errtmp"; printf "html\nunknown"; return ;;
+    *) echo "  $id: HTTP $http_code ($url)" >&2; rm -f "$errtmp"; printf "offline\nunknown"; return ;;
+  esac
   rm -f "$errtmp"
 
   local scripts
