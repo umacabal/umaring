@@ -13,7 +13,7 @@ It is a collection of personal websites, blogs, and other web pages.
 
 Add the following script to your website:
 ```html
-<script src="https://umaring.github.io/ring.js?id=USERNAME"></script>
+<script src="https://umaring.github.io/USERNAME.js"></script>
 <div id="umaring"></div>
 ```
 

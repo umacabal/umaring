@@ -31,12 +31,19 @@ detect_domain() {
 
 # outputs: status domain (two lines)
 check_member() {
-  local url="$1"
+  local url="$1" id="$2"
   local html
   html=$(curl -sfL --connect-timeout 2 --max-time 5 "$url" 2>/dev/null) || { printf "offline\nunknown"; return; }
 
   local scripts
   scripts=$(echo "$html" | grep -oiE 'src=['"'"'"]?[^'"'"'" >]+' | sed "s/^src=['\"]\\?//")
+
+  for src in $scripts; do
+    if echo "$src" | grep -qiE "umaring\\.(mkr\\.cx|github\\.io)/${id}\\.js"; then
+      printf "member.js\n%s" "$(detect_domain "$src")"
+      return
+    fi
+  done
 
   for src in $scripts; do
     if echo "$src" | grep -qiE 'umaring\.(mkr\.cx|github\.io)/ring\.js'; then
@@ -83,8 +90,8 @@ h1 { font-size: 1.2em; color: #fff; }
 table { border-collapse: collapse; width: 100%; }
 td { padding: 4px 8px; }
 a { color: #8bf; }
-.ring\\.js, .js, .html, .github\\.io { color: #6e6; }
-.missing, .mkr\\.cx { color: #fc6; }
+.member\\.js, .js, .html, .github\\.io { color: #6e6; }
+.ring\\.js, .missing, .mkr\\.cx { color: #fc6; }
 .offline, .unknown { color: #f66; }
 .time { color: #666; font-size: 0.85em; margin-top: 20px; }
 </style>
@@ -119,6 +126,10 @@ write_member_files() {
 
   redirect_html "$prev_url" "$prev_name" > "$OUT/$id/prev/index.html"
   redirect_html "$next_url" "$next_name" > "$OUT/$id/next/index.html"
+
+  local prev_json=$(echo "$prev" | jq -c '{id, name, url}')
+  local next_json=$(echo "$next" | jq -c '{id, name, url}')
+  sed -e "s|PREV_DATA_HERE|$prev_json|" -e "s|NEXT_DATA_HERE|$next_json|" member.js > "$OUT/$id.js"
 }
 
 # run check_member in parallel, collect results into $tmpdir/{0,1,...}
@@ -128,7 +139,8 @@ parallel_check() {
   local tmpdir=$(mktemp -d)
   for i in $(seq 0 $((len - 1))); do
     local url=$(echo "$shuffled" | jq -r ".[$i].url")
-    ( check_member "$url" > "$tmpdir/$i" ) &
+    local id=$(echo "$shuffled" | jq -r ".[$i].id")
+    ( check_member "$url" "$id" > "$tmpdir/$i" ) &
   done
   wait
   echo "$tmpdir"
@@ -183,7 +195,7 @@ build() {
     statuses=$(echo "$statuses" | jq -c --arg s "$status" --arg d "$domain" --arg name "$name" --arg url "$url" \
       '. + [{status: $s, domain: $d, name: $name, url: $url}]')
     case "$status" in
-      ring.js|js|html)
+      member.js|ring.js|js|html)
         alive=$(echo "$alive" | jq -c --argjson m "$m" '. + [$m]')
         ;;
       *)
