@@ -33,8 +33,10 @@ detect_domain() {
 # outputs: status domain (two lines)
 check_member() {
   local url="$1" id="$2"
-  local html
-  html=$(curl -sfL -A "$UA" --connect-timeout 5 --max-time 10 "$url" 2>/dev/null) || { printf "offline\nunknown"; return; }
+  local html errtmp
+  errtmp=$(mktemp)
+  html=$(curl -fL -A "$UA" --connect-timeout 5 --max-time 10 "$url" 2>"$errtmp") || { echo "  $id: $(cat "$errtmp")" >&2; rm -f "$errtmp"; printf "offline\nunknown"; return; }
+  rm -f "$errtmp"
 
   local scripts
   scripts=$(echo "$html" | grep -oiE 'src=['"'"'"]?[^'"'"'" >]+' | sed "s/^src=['\"]\\?//")
@@ -62,7 +64,8 @@ check_member() {
       /*) src="${url%/}$src" ;;
       *) src="${url%/}/$src" ;;
     esac
-    curl -sfL -A "$UA" --connect-timeout 5 --max-time 10 "$src" -o "$jstmp" 2>/dev/null || continue
+    curl -fL -A "$UA" --connect-timeout 5 --max-time 10 "$src" -o "$jstmp" 2>"$jstmp.err" || { echo "  $id: $(cat "$jstmp.err") ($src)" >&2; rm -f "$jstmp.err"; continue; }
+    rm -f "$jstmp.err"
     if grep -qi "umaring" "$jstmp"; then
       printf "js\n%s" "$(detect_domain "$(cat "$jstmp")")"
       rm -f "$jstmp"
